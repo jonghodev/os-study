@@ -4,30 +4,31 @@ import java.util.concurrent.Semaphore;
 
 public class BankAccount {
     int balance;
-    Semaphore sem;
+    Semaphore dSem;
+    Semaphore wSem;
 
     public BankAccount() {
-        sem = new Semaphore(1);
+        dSem = new Semaphore(0);
+        wSem = new Semaphore(0);
     }
 
     void deposit(int amount) {
-        try {
-            sem.acquire();
-        } catch (InterruptedException e) {}
-
         int temp = balance + amount;
         System.out.print("+");
         balance = temp;
-        sem.release();
+        wSem.release();
+        try {
+            dSem.acquire();
+        } catch (InterruptedException e) {}
     }
     void withdraw(int amount) {
         try {
-            sem.acquire();
+            wSem.acquire();
         } catch (InterruptedException e) {}
         int temp = balance - amount;
         System.out.print("-");
         balance = temp;
-        sem.release();
+        dSem.release();
     }
     int getBalance() {
         System.out.println(balance);
